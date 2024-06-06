@@ -52,8 +52,9 @@ While you are waiting for the environment, add the dashboard to your Dynatrace e
 
 In the codespace terminal, type `docker ps` and wait until Docker is running.
 You should see this:
-```
 
+```
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 ```
 
 Now run k6 with the demo script. Copy and paste this as-is into the terminal window:
