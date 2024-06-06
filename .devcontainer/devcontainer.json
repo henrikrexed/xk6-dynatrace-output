@@ -57,14 +57,14 @@
 	//"postCreateCommand": "docker pull hrexed/xk6-dynatrace-output:0.11",
 
 	// Use 'postStartCommand' to run commands after the container starts.
-    "postStartCommand": "chmod +x .devcontainer/post-start.sh && .devcontainer/post-start.sh",
+    //"postStartCommand": "chmod +x .devcontainer/post-start.sh && .devcontainer/post-start.sh",
 
 	// // Add recommended secrets
 	"secrets": {
 	 	  "DT_URL": {
 	 		"description": "Dynatrace tenant URL (no trailing slash) eg. https://abc12345.live.dynatrace.com"
 		},
-		  "DT_K6_TOKEN": {
+		  "DT_KTOKEN": {
 	    	        "description": "Dynatrace API token with `metrics.ingest` permissions"
 		}
 	}

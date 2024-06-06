@@ -42,15 +42,35 @@ Create an API token with `metrics.ingest` permissions.
 
 ## Import Dynatrace Dashboad (Dynatrace platform only)
 
+While you are waiting for the environment, add the dashboard to your Dynatrace environment.
+
 1. Save the [k6 dashboard](dashboards/Grafana%20k6%20Dashboard.json) to your local machine.
 1. In Dynatrace, navigate to `Dashboards` and click `Upload`
 1. Upload the dashboard JSON file
+
+## Start k6
+
+In the codespace terminal, type `docker ps` and wait until Docker is running.
+You should see this:
+```
+
+```
+
+Now run k6 with the demo script. Copy and paste this as-is into the terminal window:
+
+```
+docker run \
+    -e K6_DYNATRACE_URL=$DT_URL \
+    -e K6_DYNATRACE_APITOKEN=$DT_K6_TOKEN \
+    --mount type=bind,source=./k6scripts,target=/k6scripts hrexed/xk6-dynatrace-output:0.11 run /k6scripts/script.js \
+    -o output-dynatrace
+```
 
 ## View statistics
 
 ![dynatrace k6 dashboard](images/k6-dashboard.png)
 
-The demo environment will start k6 automatically so metrics should soon (with a minute or two) begin streaming into Dynatrace and the dashboard should populate.
+Metrics should soon (with a minute or two) begin streaming into Dynatrace and the dashboard should populate.
 
 To see the raw list of metrics, head to the `Metrics` screen (Ctrl + k and search for `metrics`) then type `k6`.
 
