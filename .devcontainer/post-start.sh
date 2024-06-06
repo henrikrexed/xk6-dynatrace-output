@@ -4,6 +4,8 @@ do
     sleep 1
 done
 
+sleep 5
+
 echo "DEBUG: Docker is running. Proceed."
 
 docker run \
