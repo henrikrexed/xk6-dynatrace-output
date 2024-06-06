@@ -67,6 +67,26 @@ docker run \
     -o output-dynatrace
 ```
 
+You will see this output and k6 will start running:
+
+```
+Unable to find image 'hrexed/xk6-dynatrace-output:0.11' locally
+0.11: Pulling from hrexed/xk6-dynatrace-output
+f56be85fc22e: Pull complete 
+2860e5da6493: Pull complete 
+a47954fb8e1d: Pull complete 
+16af57e48460: Pull complete 
+Digest: sha256:2f11bba34ba6966e8bfbca6ab1a5ebf85bdd502f25d9f444fea75ddb7fee5517
+Status: Downloaded newer image for hrexed/xk6-dynatrace-output:0.11
+
+          /\      |‾‾| /‾‾/   /‾‾/   
+     /\  /  \     |  |/  /   /  /    
+    /  \/    \    |     (   /   ‾‾\  
+   /          \   |  |\  \ |  (‾)  | 
+  / __________ \  |__| \__\ \_____/ .io
+...
+```
+
 ## View statistics
 
 ![dynatrace k6 dashboard](images/k6-dashboard.png)
