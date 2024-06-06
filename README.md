@@ -5,9 +5,11 @@ This demo will run a k6 script and use the dynatrace output plugin to stream met
 
 ## Compatibility
 
-| Dynatrace Managed  | ✔️ |
-| Dynatrace SaaS     | ✔️ |
-| Dynatrace Platform | ✔️ |
+| Deployment         | Tutorial Compatible |
+|--------------------|---------------------|
+| Dynatrace Managed  | ✔️                 |
+| Dynatrace SaaS     | ✔️                 |
+| Dynatrace Platform | ✔️                 |
 
 ## Gather Details: Tenant ID
 
