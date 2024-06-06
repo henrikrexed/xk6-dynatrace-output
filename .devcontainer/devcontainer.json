@@ -1,0 +1,71 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/kubernetes-helm
+{
+	"name": "k6 + Dynatrace Demo Environment",
+	//"name": "Kubernetes - Local Configuration",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	//"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+
+	// do not change these if you want Docker in Docker support
+	//"runArgs": ["--init", "--privileged", "--network=host"],
+	//"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" ],
+	//"overrideCommand": false,
+
+	// some base images require a specific user name
+	//"remoteUser": "vscode",
+
+	// Install extensions
+    /*
+	"customizations": {
+		"vscode": {	
+			// Set container specific settings
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			},			
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"ms-kubernetes-tools.vscode-kubernetes-tools",
+				"davidanson.vscode-markdownlint",
+				"gruntfuggly.todo-tree",
+				"mutantdino.resourcemonitor",
+				"humao.rest-client",
+				"ms-vscode.makefile-tools"
+			]
+		}
+	},
+    */
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+    /*
+	"forwardPorts": [
+		30100
+	],
+    */
+
+	// add labels
+    /*
+	"portsAttributes": {
+		"30100": { "label": "traveladvisor User Interface" }
+	},
+    */
+
+	"hostRequirements": {
+		"cpus": 2
+	},
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "docker pull hrexed/xk6-dynatrace-output:0.11",
+
+	// Use 'postStartCommand' to run commands after the container starts.
+    "postStartCommand": "chmod +x .devcontainer/post-start.sh && .devcontainer/post-start.sh",
+
+	// // Add recommended secrets
+	"secrets": {
+	 	  "DT_URL": {
+	 		"description": "Dynatrace tenant URL (no trailing slash) eg. https://abc12345.live.dynatrace.com"
+		},
+		  "DT_TOKEN": {
+	    	        "description": "Dynatrace API token with `metrics.ingest` permissions"
+		}
+	}
+}
