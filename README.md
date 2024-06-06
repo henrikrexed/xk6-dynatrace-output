@@ -19,7 +19,7 @@ Make a note of your Dynatrace tenant ID. It is the first bit of your URL (eg. `a
 
 ```
 https://abc12345.live.dynatrace.com
-https://zeb00185.apps.dynatrace.com
+https://abc12345.apps.dynatrace.com
 ```
 
 Reformat the URL like this: `https://TENANT_ID.live.dynatrace.com` eg. `https://abc12345.live.dynatrace.com`
