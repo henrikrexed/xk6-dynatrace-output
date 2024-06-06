@@ -54,7 +54,7 @@
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "docker pull hrexed/xk6-dynatrace-output:0.11",
+	//"postCreateCommand": "docker pull hrexed/xk6-dynatrace-output:0.11",
 
 	// Use 'postStartCommand' to run commands after the container starts.
     "postStartCommand": "chmod +x .devcontainer/post-start.sh && .devcontainer/post-start.sh",
