@@ -2,33 +2,34 @@ package dynatracewriter
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
-    "fmt"
+
 	"github.com/kubernetes/helm/pkg/strvals"
 	"go.k6.io/k6/lib/types"
-    "gopkg.in/guregu/null.v3"
+	"gopkg.in/guregu/null.v3"
 )
 
 const (
-	defaultDynatraceTimeout = time.Minute
-	defaultFlushPeriod       = time.Second
-	defaultMetricPrefix      = "k6."
-	defaultDynatraceMetricEndPoint ="/api/v2/metrics/ingest"
+	defaultDynatraceTimeout        = time.Minute
+	defaultFlushPeriod             = time.Second
+	defaultMetricPrefix            = "k6."
+	defaultDynatraceMetricEndPoint = "/api/v2/metrics/ingest"
 )
 
 type Config struct {
-	Url string `json:"url" envconfig:"K6_DYNATRACE_URL"` // here, in the name of env variable, we assume that we won't need to distinguish between remote write URL vs remote read URL
-    Headers map[string]string `json:"headers" envconfig:"K6_DYNATRACE_HEADER"`
-	InsecureSkipTLSVerify null.Bool   `json:"insecureSkipTLSVerify" envconfig:"K6_DYNATRACE_INSECURE_SKIP_TLS_VERIFY"`
-	CACert                null.String `json:"caCertFile" envconfig:"K6_CA_CERT_FILE"`
-	ApiToken     null.String `json:"apitoken" envconfig:"K6_DYNATRACE_APITOKEN"`
-	FlushPeriod types.NullDuration `json:"flushPeriod" envconfig:"K6_DYNATRACE_FLUSH_PERIOD"`
-	KeepTags    null.Bool `json:"keepTags" envconfig:"K6_KEEP_TAGS"`
-	KeepNameTag null.Bool `json:"keepNameTag" envconfig:"K6_KEEP_NAME_TAG"`
-	KeepUrlTag  null.Bool `json:"keepUrlTag" envconfig:"K6_KEEP_URL_TAG"`
+	Url                   string             `json:"url" envconfig:"K6_DYNATRACE_URL"` // here, in the name of env variable, we assume that we won't need to distinguish between remote write URL vs remote read URL
+	Headers               map[string]string  `json:"headers" envconfig:"K6_DYNATRACE_HEADER"`
+	InsecureSkipTLSVerify null.Bool          `json:"insecureSkipTLSVerify" envconfig:"K6_DYNATRACE_INSECURE_SKIP_TLS_VERIFY"`
+	CACert                null.String        `json:"caCertFile" envconfig:"K6_CA_CERT_FILE"`
+	ApiToken              null.String        `json:"apitoken" envconfig:"K6_DYNATRACE_APITOKEN"`
+	FlushPeriod           types.NullDuration `json:"flushPeriod" envconfig:"K6_DYNATRACE_FLUSH_PERIOD"`
+	KeepTags              null.Bool          `json:"keepTags" envconfig:"K6_KEEP_TAGS"`
+	KeepNameTag           null.Bool          `json:"keepNameTag" envconfig:"K6_KEEP_NAME_TAG"`
+	KeepUrlTag            null.Bool          `json:"keepUrlTag" envconfig:"K6_KEEP_URL_TAG"`
 }
 
 func NewConfig() Config {
@@ -36,7 +37,7 @@ func NewConfig() Config {
 		Url:                   "https://dynatrace.live.com",
 		InsecureSkipTLSVerify: null.BoolFrom(true),
 		CACert:                null.NewString("", false),
-        ApiToken:              null.NewString("", false),
+		ApiToken:              null.NewString("", false),
 		FlushPeriod:           types.NullDurationFrom(defaultFlushPeriod),
 		KeepTags:              null.BoolFrom(true),
 		KeepNameTag:           null.BoolFrom(false),
@@ -49,18 +50,18 @@ func (conf Config) ConstructConfig() (*Config, error) {
 	// TODO: consider if the auth logic should be enforced here
 	// (e.g. if insecureSkipTLSVerify is switched off, then check for non-empty certificate file and auth, etc.)
 
-	u, err := url.Parse(conf.Url+defaultDynatraceMetricEndPoint)
+	u, err := url.Parse(conf.Url + defaultDynatraceMetricEndPoint)
 	if err != nil {
 		return nil, err
 	}
-    if len(conf.ApiToken.String) == 0 {
-       return nil, fmt.Errorf("The Dynatrace API token can not been empty or Null")
-    } else {
-        conf.Headers["Content-Type"] = "text/plain; charset=utf-8"
-        conf.Headers["Authorization"] ="Api-Token " + conf.ApiToken.String
-        conf.Headers["accept"] = "*/*"
-    }
-     conf.Url= u.String()
+	if len(conf.ApiToken.String) == 0 {
+		return nil, fmt.Errorf("The Dynatrace API token can not been empty or Null")
+	} else {
+		conf.Headers["Content-Type"] = "text/plain; charset=utf-8"
+		conf.Headers["Authorization"] = "Api-Token " + conf.ApiToken.String
+		conf.Headers["accept"] = "*/*"
+	}
+	conf.Url = u.String()
 
 	return &conf, nil
 }
@@ -68,9 +69,7 @@ func (conf Config) ConstructConfig() (*Config, error) {
 // From here till the end of the file partial duplicates waiting for config refactor (k6 #883)
 
 func (base Config) Apply(applied Config) Config {
-
-
-	if len(applied.Url)>0 {
+	if len(applied.Url) > 0 {
 		base.Url = applied.Url
 	}
 
@@ -85,8 +84,6 @@ func (base Config) Apply(applied Config) Config {
 	if applied.ApiToken.Valid {
 		base.ApiToken = applied.ApiToken
 	}
-
-
 
 	if applied.FlushPeriod.Valid {
 		base.FlushPeriod = applied.FlushPeriod
@@ -136,7 +133,6 @@ func ParseArg(arg string) (Config, error) {
 	if v, ok := params["apitoken"].(string); ok {
 		c.ApiToken = null.StringFrom(v)
 	}
-
 
 	if v, ok := params["flushPeriod"].(string); ok {
 		if err := c.FlushPeriod.UnmarshalText([]byte(v)); err != nil {
@@ -209,10 +205,8 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 		}
 	}
 
-
-
 	if url, urlDefined := env["K6_DYNATRACE_URL"]; urlDefined {
-		result.Url =url
+		result.Url = url
 	}
 
 	if b, err := getEnvBool(env, "K6_DYNATRACE_INSECURE_SKIP_TLS_VERIFY"); err != nil {
@@ -231,7 +225,6 @@ func GetConsolidatedConfig(jsonRawConf json.RawMessage, env map[string]string, a
 	if apitoken, userDefined := env["K6_DYNATRACE_APITOKEN"]; userDefined {
 		result.ApiToken = null.StringFrom(apitoken)
 	}
-
 
 	if b, err := getEnvBool(env, "K6_KEEP_TAGS"); err != nil {
 		return result, err

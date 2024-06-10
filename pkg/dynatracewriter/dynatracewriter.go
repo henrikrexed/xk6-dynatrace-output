@@ -2,21 +2,22 @@ package dynatracewriter
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"time"
-    "net/http"
-    "io/ioutil"
 	//nolint:staticcheck
-    "bytes"
+	"bytes"
+
 	"github.com/sirupsen/logrus"
-	"go.k6.io/k6/output"
 	"go.k6.io/k6/metrics"
+	"go.k6.io/k6/output"
 )
 
 type Output struct {
-	config *Config
+	config          *Config
 	periodicFlusher *output.PeriodicFlusher
 	output.SampleBuffer
-    params  output.Params
+	params output.Params
 	logger logrus.FieldLogger
 }
 
@@ -37,8 +38,8 @@ func New(params output.Params) (*Output, error) {
 	}
 
 	return &Output{
-		config:  newconfig,
-		logger:  params.Logger,
+		config: newconfig,
+		logger: params.Logger,
 	}, nil
 }
 
@@ -93,49 +94,46 @@ func (o *Output) flush() {
 	// Prometheus write handler processes only some fields as of now, so here we'll add only them.
 	dynatraceMetric := o.convertToTimeDynatraceData(samplesContainers)
 	nts = len(dynatraceMetric)
-    if nts > 0 {
-             o.logger.WithField("nts", nts).Debug("Converted samples to time series in preparation for sending.")
+	if nts > 0 {
+		o.logger.WithField("nts", nts).Debug("Converted samples to time series in preparation for sending.")
 
-            var payload=generatePayload(dynatraceMetric)
+		payload := generatePayload(dynatraceMetric)
 
-        	request, error := http.NewRequest( "POST", o.config.Url, bytes.NewBuffer([]byte(payload)))
+		request, error := http.NewRequest("POST", o.config.Url, bytes.NewBuffer([]byte(payload)))
 
-        	for key,value := range o.config.Headers {
-        	    request.Header.Set(key, value)
-        	}
-            o.logger.Debug("Payload to send " + payload)
-            client := &http.Client{}
-            response, error := client.Do(request)
-            if error != nil {
-                o.logger.WithError(error).Fatal("Failed to send timeseries.")
-            }
-            o.logger.Debug("response Status:" + response.Status)
-            defer response.Body.Close()
+		for key, value := range o.config.Headers {
+			request.Header.Set(key, value)
+		}
+		o.logger.Debug("Payload to send " + payload)
+		client := &http.Client{}
+		response, error := client.Do(request)
+		if error != nil {
+			o.logger.WithError(error).Fatal("Failed to send timeseries.")
+		}
+		o.logger.Debug("response Status:" + response.Status)
+		defer response.Body.Close()
 
-
-            var b=""
-            for key, value := range  response.Header {
-                 for _, singlevalue := range value {
-                    b+=key+"="+singlevalue+"\n"
-                 }
-            }
-            o.logger.Debug("response Headers:" + b)
-            body, _ := ioutil.ReadAll(response.Body)
-            o.logger.Debug("response Body:"+ string(body))
-    } else {
-         o.logger.Debug("no data to send")
-    }
-
+		b := ""
+		for key, value := range response.Header {
+			for _, singlevalue := range value {
+				b += key + "=" + singlevalue + "\n"
+			}
+		}
+		o.logger.Debug("response Headers:" + b)
+		body, _ := ioutil.ReadAll(response.Body)
+		o.logger.Debug("response Body:" + string(body))
+	} else {
+		o.logger.Debug("no data to send")
+	}
 }
 
 func generatePayload(dynatraceMetrics []dynatraceMetric) string {
+	result := ""
+	for i := 0; i < len(dynatraceMetrics); i++ {
+		result += dynatraceMetrics[i].toText() + "\n"
+	}
 
-    var result=""
-    for i:= 0; i < len(dynatraceMetrics); i++ {
-        result+=dynatraceMetrics[i].toText()+"\n"
-    }
-
-    return result
+	return result
 }
 
 func (o *Output) convertToTimeDynatraceData(samplesContainers []metrics.SampleContainer) []dynatraceMetric {
@@ -151,13 +149,13 @@ func (o *Output) convertToTimeDynatraceData(samplesContainers []metrics.SampleCo
 			// lose info in tags or assign tags wrongly, let's store each Sample in a different TimeSeries, for now.
 			// This approach also allows to avoid hard to replicate issues with duplicate timestamps.
 
-            dynametric := samleToDynametric( sample)
-            if &dynametric.metricValue != nil {
-                o.logger.Debug("metric name : " + dynametric.metricKeyName)
-                dynTimeSeries = append  (dynTimeSeries, dynametric)
-            } else {
-                o.logger.Debug("The value is missing")
-            }
+			dynametric := samleToDynametric(sample)
+			if &dynametric.metricValue != nil {
+				o.logger.Debug("metric name : " + dynametric.metricKeyName)
+				dynTimeSeries = append(dynTimeSeries, dynametric)
+			} else {
+				o.logger.Debug("The value is missing")
+			}
 		}
 
 		// Do not blow up if remote endpoint is overloaded and responds too slowly.
